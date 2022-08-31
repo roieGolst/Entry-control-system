@@ -1,4 +1,5 @@
 import express, { Router }  from "express";
+import { createPermissionValidate } from "../../../validation/permission";
 import { permissionUtils } from "../../../utils/db";
 
 const router: Router = express.Router();
@@ -31,6 +32,13 @@ router.get("/:armyId/:deviceSerial", async (req, res) => {
 });
 
 router.post("/create", async (req, res) => {
+    const { error } = createPermissionValidate(req.body);
+
+    if(error) {
+        res.status(400).send(error.message);
+        return;
+    }
+
     const permission = await permissionUtils.addPermission(req.body);
 
     if(permission instanceof Error) {

@@ -1,5 +1,6 @@
 import express, { Router }  from "express";
 import { deviceUtils } from "../../../utils/db";
+import { createDeviceValidate } from "../../../validation/device";
 
 const router: Router = express.Router();
 
@@ -18,6 +19,14 @@ router.get("/:serialNumber", async (req, res) => {
 });
 
 router.post("/create", async (req, res) => {
+
+    const { error } = createDeviceValidate(req.body);
+
+    if(error) {
+        res.status(400).send(error.message);
+        return;
+    }
+
     const device = await deviceUtils.addDevice(req.body);
 
     if(device === null) {

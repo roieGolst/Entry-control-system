@@ -1,7 +1,7 @@
 import Permission from "../../DB/models/Permission";
 import { userUtils, deviceUtils } from "./index";
 
-type PermissionAtributs = {
+export type PermissionAtributs = {
     armyId: number;
     deviceSerial: string;
 }

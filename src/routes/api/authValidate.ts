@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import env from "../config/env.json";
+import env from "../../config/env.json";
 import jwt from "jsonwebtoken";
 
 export function authValidate(req: Request, res: Response, next: NextFunction): void {
@@ -11,7 +11,7 @@ export function authValidate(req: Request, res: Response, next: NextFunction): v
     }
 
     try {
-        const isverfied = jwt.verify(token, env.SECRET_TOKEN);
+        jwt.verify(token, env.SECRET_TOKEN);
         next();
     }
     catch(err) {

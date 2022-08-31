@@ -2,7 +2,7 @@ import Device from "../../DB/models/Device";
 
 const INSIDE_GATE = 2;
 
-type DeviceAtributs = {
+export type DeviceAtributs = {
     serialNumber: string;
     location: string;
     gateType: number;
