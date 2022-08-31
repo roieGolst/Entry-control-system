@@ -12,6 +12,11 @@ export type UserAtributs = {
     password?: string;
 }
 
+export type LoginAtributs = {
+    armyId: number,
+    password: string
+}
+
 export async function addUser(obj: UserAtributs): Promise<User | unknown>{
     try {
         let date = new Date();
@@ -87,4 +92,24 @@ export async function deleteUser(armyId: number): Promise<boolean> {
     );
 
     return true;
+}
+
+export async function checkUser(obj: LoginAtributs): Promise<User | boolean> {
+    const user = await getUser(obj.armyId);
+
+    if(user === null) {
+        return false;
+    }
+
+    if(!user.Admin) {
+        return false;
+    }
+
+    const isVaildPassword = await bcrypt.compare(obj.password, user.password);
+
+    if(!isVaildPassword) {
+        return false;
+    }
+
+    return user;
 }

@@ -1,13 +1,11 @@
 import express from "express";
-import * as router from "./index";
+import apiRouts from "./api/apiRoutes";
+import { entry } from "./api";
 
 const app = express();
 
-app.use("/users", router.user);
-app.use("/devices", router.device);
-app.use("/permissions", router.premission);
-app.use("/logs", router.logs);
-app.use("/entry", router.entry);
+app.use("/api", apiRouts);
+app.use("/entry", entry);
 
 export default app;
 

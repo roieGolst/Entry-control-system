@@ -1,5 +1,5 @@
 import express, { Router }  from "express";
-import { deviceUtils } from "../../utils/db";
+import { deviceUtils } from "../../../utils/db";
 
 const router: Router = express.Router();
 

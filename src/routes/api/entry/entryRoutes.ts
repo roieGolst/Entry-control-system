@@ -1,5 +1,5 @@
 import express, { Router }  from "express";
-import { isGrantedUser } from "../../utils/gate/gateUtils";
+import { isGrantedUser } from "../../../utils/gate/gateUtils";
 
 const router: Router = express.Router();
 

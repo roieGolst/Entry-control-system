@@ -1,5 +1,5 @@
 import express, { Router }  from "express";
-import { permissionUtils } from "../../utils/db";
+import { permissionUtils } from "../../../utils/db";
 
 const router: Router = express.Router();
 

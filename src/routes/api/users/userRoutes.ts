@@ -1,6 +1,6 @@
 import express, { Router }  from "express";
-import { userUtils } from "../../utils/db";
-import { creataUserValidate } from "../../validation/users";
+import { userUtils } from "../../../utils/db";
+import { creataUserValidate } from "../../../validation/users";
 
 const router: Router = express.Router();
 
@@ -21,6 +21,7 @@ router.get("/:armyId", async (req, res) => {
 router.post("/create", async (req, res) => {
 
     const { error } = creataUserValidate(req.body);
+    
     if(error){
         res.status(400).send(error.message);
         return;
