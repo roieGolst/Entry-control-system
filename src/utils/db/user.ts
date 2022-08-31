@@ -78,6 +78,21 @@ export async function updateUserName(armyId: number, updatedName: string): Promi
     return true;
 }
 
+export async function updateUserPassword(armyId: number, requestedPassword: string): Promise<boolean>{
+    if(await User.findByPk(armyId) === null) {
+        return false;
+    }
+
+    const vaildPassword = await bcrypt.hash(requestedPassword, SALT_ROUNDS);
+    
+    await User.update(
+        { password: vaildPassword},
+        { where: { armyId: armyId } }
+    );
+
+    return true;
+}
+
 export async function deleteUser(armyId: number): Promise<boolean> {
     let user = await User.findByPk(armyId);
 

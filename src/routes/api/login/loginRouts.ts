@@ -14,6 +14,7 @@ router.post("/", async (req, res) => {
 
     if(error) {
         res.status(400).send(error.message);
+        return;
     }
 
     const user = await userUtils.checkUser(req.body);

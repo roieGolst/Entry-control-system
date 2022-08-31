@@ -52,22 +52,20 @@ router.put("/updateName/:armyId", async (req, res) => {
     res.send(`Updated user name`);
 })
 
-// router.put("/updatePassword/:name/:password", async (req, res) => {
-//     const requestedUser = req.params.name;
+router.put("/updatePassword/:armyId", async (req, res) => {
+    const armyId = parseInt(req.params.armyId);
+    const reuestedPassword: string = req.body.password;
 
-//     User.update(
-//         { password: req.body.password },
-//         { where: { username: requestedUser, password: req.params.password} }
-//     );
+    let userUpdated = await userUtils.updateUserPassword(armyId, reuestedPassword);
 
-//     if(await User.findOne({ where: { username: requestedUser } }) == null) {
-//         res.status(400).send("User not defind");
-//         return;
-//     }
+    if(!userUpdated) {
+        res.status(400).send(`User not define`);
+        return;
+    }
 
-//     res.send(`Updated user password`);
-    
-// })
+    res.send(`Password updated`);
+})
+
 
 
 router.delete("/:armyId", async (req, res) => {
