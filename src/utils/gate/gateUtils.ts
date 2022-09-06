@@ -1,27 +1,27 @@
 import Devices from "../../DB/models/Device";
-import User from "../../DB/models/User";
+import Soldier from "../../DB/models/Soldier";
 import * as Utils from "../db"
 
 const OUTSIDE_GATE = 1;
 const INSIDE_GATE = 2;
 
 export async function isGrantedUser(armyId: number, deviceSerial: string): Promise<boolean> {
-    const user = await  Utils.userUtils.getUser(armyId);
+    const soldier = await  Utils.soldierUtils.getSoldier(armyId);
     
-    if(user == null) {
+    if(soldier == null) {
         await Utils.logUtils.addLog({
             type: "Entry",
             armyId: armyId,
             deviceSerial: deviceSerial,
             status: false, 
-            response: "User not exists"
+            response: "soldier not exists"
         });
 
         return false;
     }
 
     const moment = new Date();
-    const databaseDate = new Date(user.expiraionDate);
+    const databaseDate = new Date(soldier.expiraionDate);
     
     if(databaseDate.toISOString() < moment.toISOString()) {
         await Utils.logUtils.addLog({
@@ -29,7 +29,7 @@ export async function isGrantedUser(armyId: number, deviceSerial: string): Promi
             armyId: armyId,
             deviceSerial: deviceSerial,
             status: false, 
-            response: "User expire"
+            response: "Soldier expire"
         });
 
         return false;
@@ -51,11 +51,11 @@ export async function isGrantedUser(armyId: number, deviceSerial: string): Promi
 
     switch(device.gateType) {
         case OUTSIDE_GATE:
-            const hasPermission = await outsideGateVerification(user, device);
+            const hasPermission = await outsideGateVerification(soldier, device);
             return hasPermission;
 
         case INSIDE_GATE:
-            const isGranted = await insideGateVerification(user, device);
+            const isGranted = await insideGateVerification(soldier, device);
             return isGranted;
 
         default:
@@ -71,11 +71,11 @@ export async function isGrantedUser(armyId: number, deviceSerial: string): Promi
     }
 }
 
-async function outsideGateVerification(user: User, device: Devices): Promise<boolean> {
-    if(user.level >= device.level) {
+async function outsideGateVerification(soldier: Soldier, device: Devices): Promise<boolean> {
+    if(soldier.level >= device.level) {
         await Utils.logUtils.addLog({
             type: "Entry",
-            armyId: user.armyId,
+            armyId: soldier.armyId,
             deviceSerial: device.serialNumber,
             status: true, 
             response: `Entry approved, level aproved`
@@ -86,7 +86,7 @@ async function outsideGateVerification(user: User, device: Devices): Promise<boo
     else {
         await Utils.logUtils.addLog({
             type: "Entry",
-            armyId: user.armyId,
+            armyId: soldier.armyId,
             deviceSerial: device.serialNumber,
             status: false, 
             response: `No pass, level not aproved`
@@ -96,13 +96,13 @@ async function outsideGateVerification(user: User, device: Devices): Promise<boo
     }
 }
 
-async function insideGateVerification(user: User, device: Devices): Promise<boolean> {
-    const permission = await Utils.permissionUtils.getPermission(user.armyId, device.serialNumber);
+async function insideGateVerification(soldier: Soldier, device: Devices): Promise<boolean> {
+    const permission = await Utils.permissionUtils.getPermission(soldier.armyId, device.serialNumber);
 
     if(permission === null) {
         await Utils.logUtils.addLog({
             type: "Entry",
-            armyId: user.armyId,
+            armyId: soldier.armyId,
             deviceSerial: device.serialNumber,
             status: false, 
             response: "No permission"
@@ -117,7 +117,7 @@ async function insideGateVerification(user: User, device: Devices): Promise<bool
     if(databaseDate.toISOString() < moment.toISOString()) {
         await Utils.logUtils.addLog({
             type: "Entry",
-            armyId: user.armyId,
+            armyId: soldier.armyId,
             deviceSerial: device.serialNumber,
             status: false, 
             response: "Permission expired"
@@ -128,7 +128,7 @@ async function insideGateVerification(user: User, device: Devices): Promise<bool
 
     await Utils.logUtils.addLog({
         type: "Entry",
-        armyId: user.armyId,
+        armyId: soldier.armyId,
         deviceSerial: device.serialNumber,
         status: true, 
         response: "Entry approved, permission aproved"

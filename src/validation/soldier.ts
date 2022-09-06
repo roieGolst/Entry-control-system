@@ -1,8 +1,8 @@
 import Joi from "joi";
-import { LoginAtributs, UserAtributs } from "../utils/db/user";
+import { SoldierAtributs } from "../utils/db/soldier";
 import magicNumbers from "../config/magicNumbers.json";
 
-const createUserSchema = Joi.object({
+const createSoldierSchema = Joi.object({
 
     armyId: Joi.string()
         .min(magicNumbers.ARMY_ID_LENGTH)
@@ -26,28 +26,9 @@ const createUserSchema = Joi.object({
     level: Joi.string()
         .min(magicNumbers.LEVEL_LENGTH)
         .max(magicNumbers.LEVEL_LENGTH)
-        .required(),
-
-    password: Joi.string()
-        .required()
-        .min(magicNumbers.MIN_PASSWORD_LENGTH)
+        .optional(),
 });
 
-export function creataUserValidate(data: UserAtributs) {
-    return  createUserSchema.validate(data);
-}
-
-const loginUserSchema = Joi.object({
-    armyId: Joi.string()
-        .min(magicNumbers.ARMY_ID_LENGTH)
-        .max(magicNumbers.ARMY_ID_LENGTH)
-        .required(),
-
-    password: Joi.string()
-        .min(magicNumbers.MIN_PASSWORD_LENGTH)
-        .required()
-});
-
-export function loginUserValidate(date: LoginAtributs) {
-    return loginUserSchema.validate(date)
+export function creataSoldierValidate(data: SoldierAtributs) {
+    return  createSoldierSchema.validate(data);
 }

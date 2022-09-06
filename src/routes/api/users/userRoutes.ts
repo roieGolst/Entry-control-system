@@ -10,7 +10,7 @@ router.get("/:armyId", async (req, res) => {
     const armyId = parseInt(req.params.armyId);
     const user = await userUtils.getUser(armyId);
 
-    if(user === null) {
+    if(!user) {
         res.status(400).send(`User not define`);
         return;
     }
@@ -27,10 +27,10 @@ router.post("/create", async (req, res) => {
         return;
     }
 
-    const user = await userUtils.addUser(req.body);
+    const { iserror } = await userUtils.addUser(req.body);
 
-    if(user instanceof Error) {
-        res.status(400).send(`Error message: ${user.message}`);
+    if(iserror) {
+        res.status(400).send(`Error message: ${iserror.message}`);
         return;
     }
 

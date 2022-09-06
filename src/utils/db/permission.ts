@@ -1,5 +1,5 @@
 import Permission from "../../DB/models/Permission";
-import { userUtils, deviceUtils } from "./index";
+import { soldierUtils, deviceUtils } from "./index";
 
 export type PermissionAtributs = {
     armyId: number;
@@ -11,15 +11,15 @@ export async function addPermission(obj: PermissionAtributs): Promise<Permission
         let moment = new Date();
         moment.setFullYear(moment.getFullYear() + 1);
 
-        const user = await userUtils.getUser(obj.armyId);
+        const soldier = await soldierUtils.getSoldier(obj.armyId);
         const device = await deviceUtils.getDevice(obj.deviceSerial);
         const asPermission = await Permission.findOne({ where: {armyId: obj.armyId, deviceSerial: obj.deviceSerial} });
 
-        if(user === null) {
+        if(!soldier) {
             throw Error("Can't create permission on user that not exists");
         }
 
-        if(device === null) {
+        if(!device) {
             throw Error("Can't create permission on device that not exists");
         }
 
@@ -34,10 +34,10 @@ export async function addPermission(obj: PermissionAtributs): Promise<Permission
                 expirationDate: moment.toISOString()
             }
         )
-        return Promise.resolve(permission);
+        return permission;
     }
     catch(err) {
-        return Promise.resolve(err);
+        return err;
     }
 }
 
@@ -49,7 +49,7 @@ export async function getPermission(armyId: number ,deviceSerial?: string): Prom
             }
         )
     
-        return Promise.resolve(permission);
+        return permission;
     }
 
     const permission = await Permission.findOne(
@@ -58,7 +58,7 @@ export async function getPermission(armyId: number ,deviceSerial?: string): Prom
         }
     )
 
-    return Promise.resolve(permission);
+    return permission;
 }
 
 export async function deletePermission(armyId: number ,deviceSerial: string): Promise<boolean> {

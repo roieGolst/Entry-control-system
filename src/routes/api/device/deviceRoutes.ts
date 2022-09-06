@@ -11,7 +11,7 @@ router.get("/:serialNumber", async (req, res) => {
 
     const requestedDevice =  await deviceUtils.getDevice(serialNumber);
 
-    if(requestedDevice === null) {
+    if(!requestedDevice) {
         res.status(400).send("Device not exists");
     }
 
@@ -29,7 +29,7 @@ router.post("/create", async (req, res) => {
 
     const device = await deviceUtils.addDevice(req.body);
 
-    if(device === null) {
+    if(!device) {
         res.status(400).send("Device not exists");
     }
 

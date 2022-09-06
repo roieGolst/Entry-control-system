@@ -2,14 +2,23 @@ import bcrypt from "bcrypt";
 import User from "../../DB/models/User";
 const SALT_ROUNDS = 10;
 
+class AddUserResponse {
+    user: User | undefined;
+    iserror?: any
+    
+    constructor(user: User | undefined, error: any = undefined) {
+        this.user = user;
+        this.iserror = error;
+    }
+}
+
 export type UserAtributs = {
-    Admin?: boolean
     armyId: number;
     name: string;
     lastname: string;
     phoneNumber: string;
     level: number;
-    password?: string;
+    password: string;
 }
 
 export type LoginAtributs = {
@@ -17,32 +26,14 @@ export type LoginAtributs = {
     password: string
 }
 
-export async function addUser(obj: UserAtributs): Promise<User | unknown>{
+export async function addUser(obj: UserAtributs): Promise<AddUserResponse>{
     try {
         let date = new Date();
         date.setFullYear(date.getFullYear() + 1);
 
 
-        if(!obj.Admin || !obj.password) {
-            const user = await User.create(
-                {
-                    Admin: false,
-                    armyId: obj.armyId,
-                    name: obj.name,
-                    lastname: obj.lastname,
-                    phoneNumber: obj.phoneNumber,
-                    level: obj.level,
-                    expiraionDate: date.toISOString()
-                }
-            );
-
-            return Promise.resolve(user); 
-        }
-
-
         let user = await User.create(
             {
-                Admin: obj.Admin,
                 armyId: obj.armyId,
                 name: obj.name,
                 lastname: obj.lastname,
@@ -52,21 +43,21 @@ export async function addUser(obj: UserAtributs): Promise<User | unknown>{
                 expiraionDate: date.toDateString()
             }
         );
-        return Promise.resolve(user);
+        return new AddUserResponse(user);
     }
     catch(err) {
-        return Promise.resolve(err);
+        return new AddUserResponse(undefined, err);
     }
 }
 
 export async function getUser(armyId: number): Promise<User | null> {
     let user = await User.findByPk(armyId);
 
-    return Promise.resolve(user);
+    return user;
 }
 
 export async function updateUserName(armyId: number, updatedName: string): Promise<boolean>{
-    if(await User.findByPk(armyId) === null) {
+    if(! await User.findByPk(armyId)) {
         return false;
     }
     
@@ -79,7 +70,7 @@ export async function updateUserName(armyId: number, updatedName: string): Promi
 }
 
 export async function updateUserPassword(armyId: number, requestedPassword: string): Promise<boolean>{
-    if(await User.findByPk(armyId) === null) {
+    if(! await User.findByPk(armyId)) {
         return false;
     }
 
@@ -96,7 +87,7 @@ export async function updateUserPassword(armyId: number, requestedPassword: stri
 export async function deleteUser(armyId: number): Promise<boolean> {
     let user = await User.findByPk(armyId);
 
-    if(user === null) {
+    if(!user) {
         return false;
     }
 
@@ -109,21 +100,17 @@ export async function deleteUser(armyId: number): Promise<boolean> {
     return true;
 }
 
-export async function checkUser(obj: LoginAtributs): Promise<User | boolean> {
+export async function checkUser(obj: LoginAtributs): Promise<User | undefined> {
     const user = await getUser(obj.armyId);
 
-    if(user === null) {
-        return false;
-    }
-
-    if(!user.Admin) {
-        return false;
+    if(!user) {
+        return undefined;
     }
 
     const isVaildPassword = await bcrypt.compare(obj.password, user.password);
 
     if(!isVaildPassword) {
-        return false;
+        return undefined;
     }
 
     return user;

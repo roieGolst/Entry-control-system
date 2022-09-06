@@ -30,17 +30,17 @@ export async function addDevice(obj: DeviceAtributs): Promise<Device | unknown>{
                 level: obj.level
             }
         );
-        return Promise.resolve(device);
+        return device;
     }
     catch(err) {
-        return Promise.resolve(err);
+        return err;
     }
 }
 
 export async function getDevice(serialNumber: string): Promise<Device | null> {
     let device = await Device.findByPk(serialNumber);
 
-    return Promise.resolve(device);
+    return device;
 }
 
 export async function updateDeviceLocation(serialNumber: string, location: string): Promise<boolean>{

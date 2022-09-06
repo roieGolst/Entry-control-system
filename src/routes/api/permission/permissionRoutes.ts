@@ -10,7 +10,7 @@ router.get("/:armyId", async (req, res) => {
     const armyId = parseInt(req.params.armyId);
     const permission = await permissionUtils.getPermission(armyId);
 
-    if(permission === null) {
+    if(!permission) {
         res.status(400).send(`Permission not define`);
         return;
     }
