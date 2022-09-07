@@ -14,14 +14,13 @@ const createDeviceSchema = Joi.object({
         .required(),
 
     gateType: Joi.string()
-        .min(1)
-        .max(1)
+        .valid(`${magicNumber.INSIDE_GATE}`, `${magicNumber.OUTSIDE_GATE}`)
         .required(),
 
     level: Joi.string()
         .min(magicNumber.LEVEL_LENGTH)
         .max(magicNumber.LEVEL_LENGTH)
-        .required(),
+        .optional(),
 })
 
 export function createDeviceValidate(data: DeviceAtributs) {

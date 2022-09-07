@@ -19,18 +19,23 @@ router.get("/:armyId", async (req, res) => {
 });
 
 router.post("/create", async (req, res) => {
-
-    const { error } = creataUserValidate(req.body);
+    const packetBody = JSON.parse(req.body);
+    const { error } = creataUserValidate(packetBody);
     
     if(error){
-        res.status(400).send(error.message);
+        res.status(400).send(`Validation error: ${error.message}`);
         return;
     }
 
-    const { iserror } = await userUtils.addUser(req.body);
+    const { iserror } = await userUtils.addUser(packetBody);
 
     if(iserror) {
-        res.status(400).send(`Error message: ${iserror.message}`);
+        if(iserror.errors[0].message){
+            res.status(400).send(`Error message: ${iserror.errors[0].message}`);
+        }
+        else{
+            res.status(400).send(`Error message: ${iserror.message})`);
+        }
         return;
     }
 
@@ -40,7 +45,7 @@ router.post("/create", async (req, res) => {
 
 router.put("/updateName/:armyId", async (req, res) => {
     const armyId = parseInt(req.params.armyId);
-    const requestedName: string = req.body.name;
+    const requestedName = JSON.stringify(req.body.name);
 
     let userUpdated = await userUtils.updateUserName(armyId, requestedName);
 
@@ -54,7 +59,7 @@ router.put("/updateName/:armyId", async (req, res) => {
 
 router.put("/updatePassword/:armyId", async (req, res) => {
     const armyId = parseInt(req.params.armyId);
-    const reuestedPassword: string = req.body.password;
+    const reuestedPassword = JSON.stringify(req.body.password);
 
     let userUpdated = await userUtils.updateUserPassword(armyId, reuestedPassword);
 

@@ -12,7 +12,7 @@ router.post("/", async (req, res) => {
     const { error } = loginUserValidate(req.body);
 
     if(error) {
-        res.status(400).send(error.message);
+        res.status(400).send(`Validation error: ${error.message}`);
         return;
     }
 

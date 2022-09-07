@@ -1,14 +1,12 @@
 import Devices from "../../DB/models/Device";
 import Soldier from "../../DB/models/Soldier";
 import * as Utils from "../db"
-
-const OUTSIDE_GATE = 1;
-const INSIDE_GATE = 2;
+import magicNumbers from "../../config/magicNumbers.json";
 
 export async function isGrantedUser(armyId: number, deviceSerial: string): Promise<boolean> {
     const soldier = await  Utils.soldierUtils.getSoldier(armyId);
     
-    if(soldier == null) {
+    if(!soldier) {
         await Utils.logUtils.addLog({
             type: "Entry",
             armyId: armyId,
@@ -37,7 +35,7 @@ export async function isGrantedUser(armyId: number, deviceSerial: string): Promi
 
     const device = await Utils.deviceUtils.getDevice(deviceSerial);
 
-    if(device == null) {
+    if(!device) {
         await Utils.logUtils.addLog({
             type: "Entry",
             armyId: armyId,
@@ -50,11 +48,11 @@ export async function isGrantedUser(armyId: number, deviceSerial: string): Promi
     }
 
     switch(device.gateType) {
-        case OUTSIDE_GATE:
+        case magicNumbers.OUTSIDE_GATE:
             const hasPermission = await outsideGateVerification(soldier, device);
             return hasPermission;
 
-        case INSIDE_GATE:
+        case magicNumbers.INSIDE_GATE:
             const isGranted = await insideGateVerification(soldier, device);
             return isGranted;
 
@@ -99,7 +97,7 @@ async function outsideGateVerification(soldier: Soldier, device: Devices): Promi
 async function insideGateVerification(soldier: Soldier, device: Devices): Promise<boolean> {
     const permission = await Utils.permissionUtils.getPermission(soldier.armyId, device.serialNumber);
 
-    if(permission === null) {
+    if(!permission) {
         await Utils.logUtils.addLog({
             type: "Entry",
             armyId: soldier.armyId,

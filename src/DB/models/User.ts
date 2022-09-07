@@ -7,7 +7,6 @@ export default class User extends Model<InferAttributes<User>, InferCreationAttr
     declare name: string;
     declare lastname: string;
     declare phoneNumber: string;
-    declare level: number;
     declare password: string;
     declare expiraionDate: string;
 };
@@ -31,12 +30,6 @@ User.init(
 
         phoneNumber: {
             type: DataTypes.STRING(magicNumbers.PHONE_NUMBER_LENGTH)
-        },
-        
-        level: {
-            type: DataTypes.TINYINT,
-            allowNull: false,
-            defaultValue: magicNumbers.LOWER_LEVEL
         },
         
         password: {

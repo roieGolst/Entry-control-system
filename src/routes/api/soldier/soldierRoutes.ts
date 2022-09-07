@@ -23,14 +23,19 @@ router.post("/create", async (req, res) => {
     const { error } = creataSoldierValidate(req.body);
     
     if(error){
-        res.status(400).send(error.message);
+        res.status(400).send(`Validation error: ${error.message}`);
         return;
     }
 
     const { iserror } = await soldierUtils.addSoldier(req.body);
 
     if(iserror) {
-        res.status(400).send(`Error message: ${iserror.message}`);
+        if(iserror.errors[0].message){
+            res.status(400).send(`Error message: ${iserror.errors[0].message}`);
+        }
+        else{
+            res.status(400).send(`Error message: ${iserror.message})`);
+        }
         return;
     }
 

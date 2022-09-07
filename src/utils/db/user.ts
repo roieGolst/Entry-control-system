@@ -17,7 +17,6 @@ export type UserAtributs = {
     name: string;
     lastname: string;
     phoneNumber: string;
-    level: number;
     password: string;
 }
 
@@ -38,7 +37,6 @@ export async function addUser(obj: UserAtributs): Promise<AddUserResponse>{
                 name: obj.name,
                 lastname: obj.lastname,
                 phoneNumber: obj.phoneNumber,
-                level: obj.level,
                 password: await bcrypt.hash(obj.password, SALT_ROUNDS),
                 expiraionDate: date.toDateString()
             }

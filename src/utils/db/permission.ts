@@ -1,12 +1,22 @@
 import Permission from "../../DB/models/Permission";
 import { soldierUtils, deviceUtils } from "./index";
 
+class AddPermissionResponse {
+    permission: Permission | undefined;
+    iserror?: any
+    
+    constructor(permission: Permission | undefined, error: any = undefined) {
+        this.permission = permission;
+        this.iserror = error;
+    }
+}
+
 export type PermissionAtributs = {
     armyId: number;
     deviceSerial: string;
 }
 
-export async function addPermission(obj: PermissionAtributs): Promise<Permission | unknown>{
+export async function addPermission(obj: PermissionAtributs): Promise<AddPermissionResponse>{
     try {
         let moment = new Date();
         moment.setFullYear(moment.getFullYear() + 1);
@@ -23,7 +33,7 @@ export async function addPermission(obj: PermissionAtributs): Promise<Permission
             throw Error("Can't create permission on device that not exists");
         }
 
-        if(asPermission !== null) {
+        if(asPermission) {
             throw Error("Permission already exists");
         }
 
@@ -34,10 +44,10 @@ export async function addPermission(obj: PermissionAtributs): Promise<Permission
                 expirationDate: moment.toISOString()
             }
         )
-        return permission;
+        return new AddPermissionResponse(permission);
     }
     catch(err) {
-        return err;
+        return new AddPermissionResponse(undefined, err);
     }
 }
 

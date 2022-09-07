@@ -23,14 +23,9 @@ const createUserSchema = Joi.object({
         .max(magicNumbers.PHONE_NUMBER_LENGTH)
         .required(),
 
-    level: Joi.string()
-        .min(magicNumbers.LEVEL_LENGTH)
-        .max(magicNumbers.LEVEL_LENGTH)
-        .required(),
-
     password: Joi.string()
-        .required()
         .min(magicNumbers.MIN_PASSWORD_LENGTH)
+        .required()
 });
 
 export function creataUserValidate(data: UserAtributs) {

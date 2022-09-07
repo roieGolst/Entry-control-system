@@ -23,7 +23,7 @@ router.get("/:armyId/:deviceSerial", async (req, res) => {
     const deviceSerial = req.params.deviceSerial;
     const permission = await permissionUtils.getPermission(armyId, deviceSerial);
 
-    if(permission === null) {
+    if(!permission) {
         res.status(400).send(`Permission not define`);
         return;
     }
@@ -35,14 +35,19 @@ router.post("/create", async (req, res) => {
     const { error } = createPermissionValidate(req.body);
 
     if(error) {
-        res.status(400).send(error.message);
+        res.status(400).send(`Validation error: ${error.message}`);
         return;
     }
 
-    const permission = await permissionUtils.addPermission(req.body);
+    const { iserror } = await permissionUtils.addPermission(req.body);
 
-    if(permission instanceof Error) {
-        res.status(400).send(`Error message: ${permission.message}`);
+    if(iserror) {
+        if(iserror.errors[0].message){
+            res.status(400).send(`Error message: ${iserror.errors[0].message}`);
+        }
+        else{
+            res.status(400).send(`Error message: ${iserror.message})`);
+        }
         return;
     }
 
