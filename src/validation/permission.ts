@@ -1,8 +1,9 @@
 import Joi from "joi";
 import { PermissionAtributs } from "../utils/db/permission";
 import magicNumbers from "../config/magicNumbers.json";
+import { IValidationResult } from "./index";
 
-const createPermissionSchema = Joi.object({
+const PermissionSchema = Joi.object({
     armyId: Joi.string()
         .min(magicNumbers.ARMY_ID_LENGTH)
         .max(magicNumbers.ARMY_ID_LENGTH)
@@ -14,6 +15,19 @@ const createPermissionSchema = Joi.object({
         .required()
 })
 
-export function createPermissionValidate(data: PermissionAtributs) {
-    return createPermissionSchema.validate(data);
+export default {
+    validate: (data: any): IValidationResult<PermissionAtributs> =>  {
+        const result = PermissionSchema.validate(data);
+
+        if(result.error) {
+            return {
+                error: result?.error?.details[0].message || "Vlidation error"
+            };
+        }
+
+        return {
+            result: data as PermissionAtributs,
+        };
+        
+    }
 }

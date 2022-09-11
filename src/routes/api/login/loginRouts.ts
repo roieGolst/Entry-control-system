@@ -1,31 +1,35 @@
 import express, { Router }  from "express";
 import { userUtils } from "../../../utils/db";
-import { loginUserValidate } from "../../../validation/users";
+import { userValidator } from "../../../validation";
 import jwt from "jsonwebtoken";
 import env from "../../../config/env.json";
+import User from "../../../DB/models/User";
+import { genereteToken } from "../token/authValidate";
 
 const router: Router = express.Router();
 
 router.use(express.json());
 
 router.post("/", async (req, res) => {
-    const { error } = loginUserValidate(req.body);
+    const isValid = userValidator.loginValidate(req.body);
 
-    if(error) {
-        res.status(400).send(`Validation error: ${error.message}`);
+    if(!isValid.result) {
+        res.status(400).send(`Validation error: ${isValid.error}`);
         return;
     }
 
-    const user = await userUtils.checkUser(req.body);
+    const user = await userUtils.checkUser(isValid.result);
 
     if(!user) {
         res.status(401).send("User name or password worng!");
     }
 
-    const token = jwt.sign({id: user!.password}, env.SECRET_TOKEN);
+    const token = genereteToken(user as User);
+    const refreshToken = jwt.sign({armyID: user!.armyId, password: user!.password}, env.REFRESH_TOKEN);
 
-        res.header("auth-token", token).send(token);
-        return;
+    res.cookie("refresh-token", refreshToken);
+    res.json({"access-token": token})
+    return;
     
 })
 

@@ -1,14 +1,6 @@
 import Soldier from "../../DB/models/Soldier";
-
-class AddSoldierResponse {
-    soldier: Soldier | undefined;
-    iserror?: any
-    
-    constructor(soldier: Soldier | undefined, error: any = undefined) {
-        this.soldier = soldier;
-        this.iserror = error;
-    }
-}
+import { InsertResult } from "./index";
+import { UniqueConstraintError } from "sequelize";
 
 export type SoldierAtributs = {
     armyId: number;
@@ -18,7 +10,7 @@ export type SoldierAtributs = {
     level: number;
 }
 
-export async function addSoldier(obj: SoldierAtributs): Promise<AddSoldierResponse>{
+export async function addSoldier(obj: any): Promise<InsertResult<SoldierAtributs>>{
     try {
         let date = new Date();
         date.setFullYear(date.getFullYear() + 1);
@@ -34,10 +26,19 @@ export async function addSoldier(obj: SoldierAtributs): Promise<AddSoldierRespon
                 expiraionDate: date.toDateString()
             }
         );
-        return new AddSoldierResponse(soldier);
+        return {
+            result: soldier
+        }
     }
     catch(err) {
-        return new AddSoldierResponse(undefined, err);
+        if(err instanceof UniqueConstraintError) {
+            return {
+                error: err.errors[0].message || "Validation error"
+            }  
+        }
+        return {
+            error: err
+        }  
     }
 }
 

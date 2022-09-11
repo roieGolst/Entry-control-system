@@ -5,5 +5,6 @@ import logs from "./logs/logsRoutes";
 import entry from "./entry/entryRoutes";
 import login from "./login/loginRouts";
 import soldier from "./soldier/soldierRoutes";
+import token from "./token/authValidate";
 
-export {user, device, premission, logs, entry, login, soldier};
+export {user, device, premission, logs, entry, login, soldier, token};

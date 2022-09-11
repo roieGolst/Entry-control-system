@@ -1,22 +1,14 @@
 import Permission from "../../DB/models/Permission";
 import { soldierUtils, deviceUtils } from "./index";
-
-class AddPermissionResponse {
-    permission: Permission | undefined;
-    iserror?: any
-    
-    constructor(permission: Permission | undefined, error: any = undefined) {
-        this.permission = permission;
-        this.iserror = error;
-    }
-}
+import { InsertResult } from "./index";
+import { UniqueConstraintError } from "sequelize"
 
 export type PermissionAtributs = {
     armyId: number;
     deviceSerial: string;
 }
 
-export async function addPermission(obj: PermissionAtributs): Promise<AddPermissionResponse>{
+export async function addPermission(obj: any): Promise<InsertResult<PermissionAtributs>>{
     try {
         let moment = new Date();
         moment.setFullYear(moment.getFullYear() + 1);
@@ -26,15 +18,21 @@ export async function addPermission(obj: PermissionAtributs): Promise<AddPermiss
         const asPermission = await Permission.findOne({ where: {armyId: obj.armyId, deviceSerial: obj.deviceSerial} });
 
         if(!soldier) {
-            throw Error("Can't create permission on user that not exists");
+            return {
+                error: "Can't create permission on user that not exists"
+            }
         }
 
         if(!device) {
-            throw Error("Can't create permission on device that not exists");
+            return {
+                error: "Can't create permission on device that not exists"
+            }
         }
 
         if(asPermission) {
-            throw Error("Permission already exists");
+            return {
+                error: "Permission already exists"
+            }
         }
 
         const permission = await Permission.create(
@@ -44,10 +42,19 @@ export async function addPermission(obj: PermissionAtributs): Promise<AddPermiss
                 expirationDate: moment.toISOString()
             }
         )
-        return new AddPermissionResponse(permission);
+        return  {
+            result: permission
+        }
     }
     catch(err) {
-        return new AddPermissionResponse(undefined, err);
+        if(err instanceof UniqueConstraintError) {
+            return {
+                error: err.errors[0].message || "Validation error"
+            }  
+        }
+        return {
+            error: err
+        }  
     }
 }
 

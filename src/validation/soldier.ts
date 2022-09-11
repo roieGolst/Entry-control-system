@@ -1,8 +1,9 @@
 import Joi from "joi";
 import { SoldierAtributs } from "../utils/db/soldier";
 import magicNumbers from "../config/magicNumbers.json";
+import { IValidationResult } from "./index";
 
-const createSoldierSchema = Joi.object({
+const soldierSchema = Joi.object({
 
     armyId: Joi.string()
         .min(magicNumbers.ARMY_ID_LENGTH)
@@ -29,6 +30,19 @@ const createSoldierSchema = Joi.object({
         .optional(),
 });
 
-export function creataSoldierValidate(data: SoldierAtributs) {
-    return  createSoldierSchema.validate(data);
+export default {
+    validate: (data: any): IValidationResult<SoldierAtributs> =>  {
+        const result = soldierSchema.validate(data);
+
+        if(result.error) {
+            return {
+                error: result?.error?.details[0].message || "Vlidation error"
+            };
+        }
+
+        return {
+            result: data as SoldierAtributs,
+        };
+        
+    }
 }

@@ -1,16 +1,7 @@
 import Device from "../../DB/models/Device";
 import magicNumber from "../../config/magicNumbers.json";
-
-
-class AddDeviceResponse {
-    device: Device | undefined;
-    iserror?: any
-    
-    constructor(device: Device | undefined, error: any = undefined) {
-        this.device = device;
-        this.iserror = error;
-    }
-}
+import { InsertResult } from "./index";
+import { UniqueConstraintError } from "sequelize";
 
 export type DeviceAtributs = {
     serialNumber: string;
@@ -19,7 +10,7 @@ export type DeviceAtributs = {
     level?: number;
 }
 
-export async function addDevice(obj: DeviceAtributs): Promise<AddDeviceResponse>{
+export async function addDevice(obj: any): Promise<InsertResult<DeviceAtributs>> {
     try {
         if(obj.gateType == magicNumber.INSIDE_GATE) {
             let device = await Device.create(
@@ -29,12 +20,16 @@ export async function addDevice(obj: DeviceAtributs): Promise<AddDeviceResponse>
                     gateType: obj.gateType,
                 }
             );
-            return new AddDeviceResponse(device);  
+            return {
+                result: device
+            }  
         }
 
-        if(obj.gateType == magicNumber.OUTSIDE_GATE && !obj.level) {
-            throw Error("When gate type is 2, level is required!")
-        }
+        // if(obj.gateType == magicNumber.OUTSIDE_GATE && !obj.level) {
+        //     return{
+        //         error: "When gate type is 1, level is required!"
+        //     }
+        // }
 
         let device = await Device.create(
             {
@@ -45,10 +40,19 @@ export async function addDevice(obj: DeviceAtributs): Promise<AddDeviceResponse>
             }
         );
 
-        return new AddDeviceResponse(device);
+        return {
+            result: device
+        }  
     }
     catch(err) {
-        return new AddDeviceResponse(undefined, err);
+        if(err instanceof UniqueConstraintError) {
+            return {
+                error: err.errors[0].message || "Validation error"
+            }  
+        }
+        return {
+            error: err
+        }  
     }
 }
 

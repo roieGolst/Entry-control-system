@@ -1,6 +1,6 @@
 import express, { Router }  from "express";
 import { deviceUtils } from "../../../utils/db";
-import { createDeviceValidate } from "../../../validation/device";
+import { deviceValidator } from "../../../validation";
 
 const router: Router = express.Router();
 
@@ -16,27 +16,22 @@ router.get("/:serialNumber", async (req, res) => {
         return;
     }
 
-    res.send(requestedDevice);
+    res.json(requestedDevice);
 });
 
 router.post("/create", async (req, res) => {
     
-    const { error } = createDeviceValidate(req.body);
+    const isValid = deviceValidator.validate(req.body);
 
-    if(error) {
-        res.status(400).send(`Validation error: ${error.message}`);
+    if(!isValid.result) {
+        res.status(400).send(`Validation error: ${isValid.error}`);
         return;
     }
 
-    const { iserror } = await deviceUtils.addDevice(req.body);
+    const device = await deviceUtils.addDevice(isValid.result);
 
-    if(iserror) {
-        if(iserror.errors[0].message){
-            res.status(400).send(`Error message: ${iserror.errors[0].message}`);
-        }
-        else{
-            res.status(400).send(`Error message: ${iserror.message})`);
-        }
+    if(!device.result) {
+        res.status(400).send(`Error message: ${device.error}`);
         return;
     }
 

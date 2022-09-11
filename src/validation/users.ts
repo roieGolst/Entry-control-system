@@ -1,8 +1,9 @@
 import Joi from "joi";
 import { LoginAtributs, UserAtributs } from "../utils/db/user";
 import magicNumbers from "../config/magicNumbers.json";
+import { IValidationResult } from "./index";
 
-const createUserSchema = Joi.object({
+const userSchema = Joi.object({
 
     armyId: Joi.string()
         .min(magicNumbers.ARMY_ID_LENGTH)
@@ -28,11 +29,9 @@ const createUserSchema = Joi.object({
         .required()
 });
 
-export function creataUserValidate(data: UserAtributs) {
-    return  createUserSchema.validate(data);
-}
 
-const loginUserSchema = Joi.object({
+
+const loginSchema = Joi.object({
     armyId: Joi.string()
         .min(magicNumbers.ARMY_ID_LENGTH)
         .max(magicNumbers.ARMY_ID_LENGTH)
@@ -43,6 +42,34 @@ const loginUserSchema = Joi.object({
         .required()
 });
 
-export function loginUserValidate(date: LoginAtributs) {
-    return loginUserSchema.validate(date)
+
+export default {
+    userValidate: (data: any): IValidationResult<UserAtributs> =>  {
+        const result = userSchema.validate(data);
+
+        if(result.error) {
+            return {
+                error: result?.error?.details[0].message || "Vlidation error"
+            };
+        }
+
+        return {
+            result: data as UserAtributs,
+        };
+        
+    },
+
+    loginValidate: (data: any): IValidationResult<LoginAtributs> =>  {
+        const result = loginSchema.validate(data);
+
+        if(result.error) {
+            return {
+                error: result?.error?.details[0].message || "Vlidation error"
+            };
+        }
+
+        return {
+            result: data as LoginAtributs,
+        };
+    }
 }

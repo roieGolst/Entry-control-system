@@ -1,6 +1,6 @@
 import express, { Router }  from "express";
 import { userUtils } from "../../../utils/db";
-import { creataUserValidate } from "../../../validation/users";
+import { userValidator } from "../../../validation";
 
 const router: Router = express.Router();
 
@@ -15,27 +15,21 @@ router.get("/:armyId", async (req, res) => {
         return;
     }
 
-    res.send(user);
+    res.json(user);
 });
 
 router.post("/create", async (req, res) => {
-    const packetBody = JSON.parse(req.body);
-    const { error } = creataUserValidate(packetBody);
+    const isValidate = userValidator.userValidate(req.body);
     
-    if(error){
-        res.status(400).send(`Validation error: ${error.message}`);
+    if(!isValidate.result){
+        res.status(400).send(`Validation error: ${isValidate.error}`);
         return;
     }
 
-    const { iserror } = await userUtils.addUser(packetBody);
+    const user = await userUtils.addUser(isValidate.result);
 
-    if(iserror) {
-        if(iserror.errors[0].message){
-            res.status(400).send(`Error message: ${iserror.errors[0].message}`);
-        }
-        else{
-            res.status(400).send(`Error message: ${iserror.message})`);
-        }
+    if(!user.result) {
+        res.status(400).send(`Error message: ${user.error})`);
         return;
     }
 

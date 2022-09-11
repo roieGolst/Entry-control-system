@@ -1,6 +1,6 @@
 import express, { Router }  from "express";
 import { soldierUtils } from "../../../utils/db";
-import { creataSoldierValidate } from "../../../validation/soldier";
+import { soldierValidator } from "../../../validation";
 
 const router: Router = express.Router();
 
@@ -20,22 +20,17 @@ router.get("/:armyId", async (req, res) => {
 
 router.post("/create", async (req, res) => {
 
-    const { error } = creataSoldierValidate(req.body);
+    const isValidate = soldierValidator.validate(req.body);
     
-    if(error){
-        res.status(400).send(`Validation error: ${error.message}`);
+    if(!isValidate.result){
+        res.status(400).send(`Validation error: ${isValidate.error}`);
         return;
     }
 
-    const { iserror } = await soldierUtils.addSoldier(req.body);
+    const soldier = await soldierUtils.addSoldier(isValidate.result);
 
-    if(iserror) {
-        if(iserror.errors[0].message){
-            res.status(400).send(`Error message: ${iserror.errors[0].message}`);
-        }
-        else{
-            res.status(400).send(`Error message: ${iserror.message})`);
-        }
+    if(!soldier.result) {
+        res.status(400).send(`Error message: ${soldier.error})`);
         return;
     }
 
@@ -69,7 +64,7 @@ router.delete("/:armyId", async (req, res) => {
         return;
     }
 
-    res.send(`Soldier delted`);
+    res.json(`Soldier delted`);
 });
 
 export default router;

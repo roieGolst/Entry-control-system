@@ -1,16 +1,10 @@
 import bcrypt from "bcrypt";
 import User from "../../DB/models/User";
+import { InsertResult } from "./index";
+import { UniqueConstraintError } from "sequelize"; 
+
 const SALT_ROUNDS = 10;
 
-class AddUserResponse {
-    user: User | undefined;
-    iserror?: any
-    
-    constructor(user: User | undefined, error: any = undefined) {
-        this.user = user;
-        this.iserror = error;
-    }
-}
 
 export type UserAtributs = {
     armyId: number;
@@ -25,11 +19,10 @@ export type LoginAtributs = {
     password: string
 }
 
-export async function addUser(obj: UserAtributs): Promise<AddUserResponse>{
+export async function addUser(obj: any): Promise<InsertResult<UserAtributs>>{
     try {
         let date = new Date();
         date.setFullYear(date.getFullYear() + 1);
-
 
         let user = await User.create(
             {
@@ -40,16 +33,29 @@ export async function addUser(obj: UserAtributs): Promise<AddUserResponse>{
                 password: await bcrypt.hash(obj.password, SALT_ROUNDS),
                 expiraionDate: date.toDateString()
             }
-        );
-        return new AddUserResponse(user);
+        )
+
+        return {
+            result: user
+        }
     }
     catch(err) {
-        return new AddUserResponse(undefined, err);
+        if(err instanceof UniqueConstraintError) {
+            return {
+                error: err.errors[0].message || "Validation error"
+            }  
+        }
+        return {
+            error: err
+        }  
     }
 }
 
 export async function getUser(armyId: number): Promise<User | null> {
-    let user = await User.findByPk(armyId);
+    let user = await User.findOne({
+        where: { armyId: armyId},
+        attributes: ["armyId", "name", "lastname", "phoneNumber", "expiraionDate"]
+    });
 
     return user;
 }
