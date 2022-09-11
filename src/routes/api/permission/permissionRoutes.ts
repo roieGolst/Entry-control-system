@@ -1,5 +1,5 @@
 import express, { Router }  from "express";
-import { createPermissionValidate } from "../../../validation/permission";
+import { permissionValidator } from "../../../validation/index";
 import { permissionUtils } from "../../../utils/db";
 
 const router: Router = express.Router();
@@ -10,12 +10,12 @@ router.get("/:armyId", async (req, res) => {
     const armyId = parseInt(req.params.armyId);
     const permission = await permissionUtils.getPermission(armyId);
 
-    if(permission === null) {
+    if(!permission) {
         res.status(400).send(`Permission not define`);
         return;
     }
 
-    res.send(permission);
+    res.json(permission);
 });
 
 router.get("/:armyId/:deviceSerial", async (req, res) => {
@@ -23,31 +23,30 @@ router.get("/:armyId/:deviceSerial", async (req, res) => {
     const deviceSerial = req.params.deviceSerial;
     const permission = await permissionUtils.getPermission(armyId, deviceSerial);
 
-    if(permission === null) {
+    if(!permission) {
         res.status(400).send(`Permission not define`);
         return;
     }
 
-    res.send(permission);
+    res.json(permission);
 });
 
 router.post("/create", async (req, res) => {
-    const { error } = createPermissionValidate(req.body);
+    const isValid = permissionValidator.validate(req.body);
 
-    if(error) {
-        res.status(400).send(error.message);
+    if(!isValid.result) {
+        res.status(400).send(`Validation error: ${isValid.error}`);
         return;
     }
 
-    const permission = await permissionUtils.addPermission(req.body);
+    const permission = await permissionUtils.addPermission(isValid.result);
 
-    if(permission instanceof Error) {
-        res.status(400).send(`Error message: ${permission.message}`);
-        return;
-    }
+    if(!permission.result) {
+            res.status(400).send(`Error message: ${permission.error})`);
+            return;
+        }
 
     res.send("permission created");
-
 });
 
 router.delete("/:armyId/:deviceSerial", async (req, res) => {

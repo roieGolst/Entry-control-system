@@ -1,5 +1,6 @@
 import { Model, DataTypes, InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
 import db from "../initDb";
+import magicNumbers from "../../config/magicNumbers.json";
 
 export default class Devices extends Model<InferAttributes<Devices>, InferCreationAttributes<Devices>> {
     declare serialNumber: string;
@@ -11,13 +12,13 @@ export default class Devices extends Model<InferAttributes<Devices>, InferCreati
 Devices.init (
     {
         serialNumber: {
-            type: DataTypes.STRING(100),
+            type: DataTypes.STRING(magicNumbers.MAX_SERIAL_NUMBER_LENGTH),
             primaryKey: true,
             allowNull: false
         },
 
         location: {
-            type: DataTypes.STRING(150),
+            type: DataTypes.STRING(magicNumbers.MAX_LOCATION_LENGTH),
             allowNull: false
         },
          

@@ -1,6 +1,6 @@
 import express, { Router }  from "express";
 import { deviceUtils } from "../../../utils/db";
-import { createDeviceValidate } from "../../../validation/device";
+import { deviceValidator } from "../../../validation";
 
 const router: Router = express.Router();
 
@@ -11,26 +11,28 @@ router.get("/:serialNumber", async (req, res) => {
 
     const requestedDevice =  await deviceUtils.getDevice(serialNumber);
 
-    if(requestedDevice === null) {
+    if(!requestedDevice) {
         res.status(400).send("Device not exists");
-    }
-
-    res.send(requestedDevice);
-});
-
-router.post("/create", async (req, res) => {
-
-    const { error } = createDeviceValidate(req.body);
-
-    if(error) {
-        res.status(400).send(error.message);
         return;
     }
 
-    const device = await deviceUtils.addDevice(req.body);
+    res.json(requestedDevice);
+});
 
-    if(device === null) {
-        res.status(400).send("Device not exists");
+router.post("/create", async (req, res) => {
+    
+    const isValid = deviceValidator.validate(req.body);
+
+    if(!isValid.result) {
+        res.status(400).send(`Validation error: ${isValid.error}`);
+        return;
+    }
+
+    const device = await deviceUtils.addDevice(isValid.result);
+
+    if(!device.result) {
+        res.status(400).send(`Error message: ${device.error}`);
+        return;
     }
 
     res.send("New device created");

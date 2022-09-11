@@ -1,57 +1,75 @@
 import Joi from "joi";
 import { LoginAtributs, UserAtributs } from "../utils/db/user";
+import magicNumbers from "../config/magicNumbers.json";
+import { IValidationResult } from "./index";
 
-
-const createUserSchema = Joi.object({
-    Admin: Joi.string()
-        .optional()
-        .min(1)
-        .max(1),
+const userSchema = Joi.object({
 
     armyId: Joi.string()
-        .min(7)
+        .min(magicNumbers.ARMY_ID_LENGTH)
         .required(),
 
     name: Joi.string()
-        .min(3)
-        .max(32)
+        .min(magicNumbers.MIN_NAME_LENGTH)
+        .max(magicNumbers.MAX_NAME_LENGTH)
         .required(),
 
     lastname: Joi.string()
-        .min(2)
-        .max(64)
+        .min(magicNumbers.MIN_NAME_LENGTH)
+        .max(magicNumbers.MAX_LASTNAME_LENGTH)
         .required(),
 
     phoneNumber: Joi.string()
-        .min(10)
-        .max(10)
-        .required(),
-
-    level: Joi.string()
-        .min(1)
-        .max(1)
+        .min(magicNumbers.PHONE_NUMBER_LENGTH)
+        .max(magicNumbers.PHONE_NUMBER_LENGTH)
         .required(),
 
     password: Joi.string()
-        .optional()
-        .min(6)
-});
-
-export function creataUserValidate(data: UserAtributs) {
-    return  createUserSchema.validate(data);
-}
-
-const loginUserSchema = Joi.object({
-    armyId: Joi.string()
-        .min(7)
-        .max(7)
-        .required(),
-
-    password: Joi.string()
-        .min(6)
+        .min(magicNumbers.MIN_PASSWORD_LENGTH)
         .required()
 });
 
-export function loginUserValidate(date: LoginAtributs) {
-    return loginUserSchema.validate(date)
+
+
+const loginSchema = Joi.object({
+    armyId: Joi.string()
+        .min(magicNumbers.ARMY_ID_LENGTH)
+        .max(magicNumbers.ARMY_ID_LENGTH)
+        .required(),
+
+    password: Joi.string()
+        .min(magicNumbers.MIN_PASSWORD_LENGTH)
+        .required()
+});
+
+
+export default {
+    userValidate: (data: any): IValidationResult<UserAtributs> =>  {
+        const result = userSchema.validate(data);
+
+        if(result.error) {
+            return {
+                error: result?.error?.details[0].message || "Vlidation error"
+            };
+        }
+
+        return {
+            result: data as UserAtributs,
+        };
+        
+    },
+
+    loginValidate: (data: any): IValidationResult<LoginAtributs> =>  {
+        const result = loginSchema.validate(data);
+
+        if(result.error) {
+            return {
+                error: result?.error?.details[0].message || "Vlidation error"
+            };
+        }
+
+        return {
+            result: data as LoginAtributs,
+        };
+    }
 }

@@ -1,17 +1,18 @@
 import Device from "../../DB/models/Device";
-
-const INSIDE_GATE = 2;
+import magicNumber from "../../config/magicNumbers.json";
+import { InsertResult } from "./index";
+import { UniqueConstraintError } from "sequelize";
 
 export type DeviceAtributs = {
     serialNumber: string;
     location: string;
     gateType: number;
-    level: number;
+    level?: number;
 }
 
-export async function addDevice(obj: DeviceAtributs): Promise<Device | unknown>{
+export async function addDevice(obj: any): Promise<InsertResult<DeviceAtributs>> {
     try {
-        if(obj.gateType == INSIDE_GATE) {
+        if(obj.gateType == magicNumber.INSIDE_GATE) {
             let device = await Device.create(
                 {
                     serialNumber: obj.serialNumber,
@@ -19,8 +20,16 @@ export async function addDevice(obj: DeviceAtributs): Promise<Device | unknown>{
                     gateType: obj.gateType,
                 }
             );
-            return Promise.resolve(device);  
+            return {
+                result: device
+            }  
         }
+
+        // if(obj.gateType == magicNumber.OUTSIDE_GATE && !obj.level) {
+        //     return{
+        //         error: "When gate type is 1, level is required!"
+        //     }
+        // }
 
         let device = await Device.create(
             {
@@ -30,22 +39,32 @@ export async function addDevice(obj: DeviceAtributs): Promise<Device | unknown>{
                 level: obj.level
             }
         );
-        return Promise.resolve(device);
+
+        return {
+            result: device
+        }  
     }
     catch(err) {
-        return Promise.resolve(err);
+        if(err instanceof UniqueConstraintError) {
+            return {
+                error: err.errors[0].message || "Validation error"
+            }  
+        }
+        return {
+            error: err
+        }  
     }
 }
 
 export async function getDevice(serialNumber: string): Promise<Device | null> {
     let device = await Device.findByPk(serialNumber);
 
-    return Promise.resolve(device);
+    return device;
 }
 
 export async function updateDeviceLocation(serialNumber: string, location: string): Promise<boolean>{
-    if(await Device.findByPk(serialNumber) === null) {
-        return false
+    if(!await Device.findByPk(serialNumber)) {
+        return false;
     }
     
     await Device.update(
@@ -59,7 +78,7 @@ export async function updateDeviceLocation(serialNumber: string, location: strin
 export async function deleteDevice(serialNumber: string): Promise<boolean> {
     let device = await Device.findByPk(serialNumber);
 
-    if(device === null) {
+    if(!device) {
         return false;
     }
 

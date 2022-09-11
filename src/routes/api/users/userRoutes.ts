@@ -1,6 +1,6 @@
 import express, { Router }  from "express";
 import { userUtils } from "../../../utils/db";
-import { creataUserValidate } from "../../../validation/users";
+import { userValidator } from "../../../validation";
 
 const router: Router = express.Router();
 
@@ -10,27 +10,26 @@ router.get("/:armyId", async (req, res) => {
     const armyId = parseInt(req.params.armyId);
     const user = await userUtils.getUser(armyId);
 
-    if(user === null) {
+    if(!user) {
         res.status(400).send(`User not define`);
         return;
     }
 
-    res.send(user);
+    res.json(user);
 });
 
 router.post("/create", async (req, res) => {
-
-    const { error } = creataUserValidate(req.body);
+    const isValidate = userValidator.userValidate(req.body);
     
-    if(error){
-        res.status(400).send(error.message);
+    if(!isValidate.result){
+        res.status(400).send(`Validation error: ${isValidate.error}`);
         return;
     }
 
-    const user = await userUtils.addUser(req.body);
+    const user = await userUtils.addUser(isValidate.result);
 
-    if(user instanceof Error) {
-        res.status(400).send(`Error message: ${user.message}`);
+    if(!user.result) {
+        res.status(400).send(`Error message: ${user.error})`);
         return;
     }
 
@@ -40,7 +39,7 @@ router.post("/create", async (req, res) => {
 
 router.put("/updateName/:armyId", async (req, res) => {
     const armyId = parseInt(req.params.armyId);
-    const requestedName: string = req.body.name;
+    const requestedName = JSON.stringify(req.body.name);
 
     let userUpdated = await userUtils.updateUserName(armyId, requestedName);
 
@@ -54,7 +53,7 @@ router.put("/updateName/:armyId", async (req, res) => {
 
 router.put("/updatePassword/:armyId", async (req, res) => {
     const armyId = parseInt(req.params.armyId);
-    const reuestedPassword: string = req.body.password;
+    const reuestedPassword = JSON.stringify(req.body.password);
 
     let userUpdated = await userUtils.updateUserPassword(armyId, reuestedPassword);
 

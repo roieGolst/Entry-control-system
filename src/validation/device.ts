@@ -1,28 +1,48 @@
-import Joi from "joi";
+import Joi, { ValidationResult } from "joi";
 import { DeviceAtributs } from "../utils/db/device";
+import magicNumber from "../config/magicNumbers.json";
+import { IValidationResult } from "./index";
 
-const createDeviceSchema = Joi.object({
+const deviceSchema = Joi.object({
     serialNumber: Joi.string()
-        .min(5)
-        .max(50)
+        .min(magicNumber.MIN_SERIAL_NUMBER_LENGTH)
+        .max(magicNumber.MAX_SERIAL_NUMBER_LENGTH)
         .required(),
 
     location: Joi.string()
-        .min(2)
-        .max(100)
+        .min(magicNumber.MIN_LOCATION_LENGTH)
+        .max(magicNumber.MAX_LOCATION_LENGTH)
         .required(),
 
-    gateType: Joi.string()
-        .min(1)
-        .max(1)
+    gateType: Joi.number()
+        .valid(magicNumber.INSIDE_GATE, magicNumber.OUTSIDE_GATE)
         .required(),
 
-    level: Joi.string()
-        .min(1)
-        .max(1)
-        .required(),
+    level: Joi.number()
+        .min(0)
+        .max(9)
+}).custom((obj, helpers) => {
+    if(obj.gateType == magicNumber.OUTSIDE_GATE && isNaN(obj.level)) {
+        throw Error("When gate type is 1, level is required!");
+    }
 })
 
-export function createDeviceValidate(data: DeviceAtributs) {
-    return createDeviceSchema.validate(data);
+export default {
+    validate: (data: any): IValidationResult<DeviceAtributs> =>  {
+        const result = deviceSchema.validate(data);
+
+
+        if(result.error) {
+            return {
+                error: result?.error?.details[0].message || "Vlidation error"
+            };
+        }
+
+        
+
+        return {
+            result: data as DeviceAtributs,
+        };
+        
+    }
 }

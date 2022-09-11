@@ -23,10 +23,10 @@ export async function addLog(obj: LogAtributs): Promise<Log | unknown> {
             }
         );
 
-        return Promise.resolve(log);
+        return log;
     }
     catch(err) {
-        return Promise.resolve(err);
+        return err;
     }
 }
 

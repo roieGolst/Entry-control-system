@@ -1,30 +1,38 @@
 import Permission from "../../DB/models/Permission";
-import { userUtils, deviceUtils } from "./index";
+import { soldierUtils, deviceUtils } from "./index";
+import { InsertResult } from "./index";
+import { UniqueConstraintError } from "sequelize"
 
 export type PermissionAtributs = {
     armyId: number;
     deviceSerial: string;
 }
 
-export async function addPermission(obj: PermissionAtributs): Promise<Permission | unknown>{
+export async function addPermission(obj: any): Promise<InsertResult<PermissionAtributs>>{
     try {
         let moment = new Date();
         moment.setFullYear(moment.getFullYear() + 1);
 
-        const user = await userUtils.getUser(obj.armyId);
+        const soldier = await soldierUtils.getSoldier(obj.armyId);
         const device = await deviceUtils.getDevice(obj.deviceSerial);
         const asPermission = await Permission.findOne({ where: {armyId: obj.armyId, deviceSerial: obj.deviceSerial} });
 
-        if(user === null) {
-            throw Error("Can't create permission on user that not exists");
+        if(!soldier) {
+            return {
+                error: "Can't create permission on user that not exists"
+            }
         }
 
-        if(device === null) {
-            throw Error("Can't create permission on device that not exists");
+        if(!device) {
+            return {
+                error: "Can't create permission on device that not exists"
+            }
         }
 
-        if(asPermission !== null) {
-            throw Error("Permission already exists");
+        if(asPermission) {
+            return {
+                error: "Permission already exists"
+            }
         }
 
         const permission = await Permission.create(
@@ -34,10 +42,19 @@ export async function addPermission(obj: PermissionAtributs): Promise<Permission
                 expirationDate: moment.toISOString()
             }
         )
-        return Promise.resolve(permission);
+        return  {
+            result: permission
+        }
     }
     catch(err) {
-        return Promise.resolve(err);
+        if(err instanceof UniqueConstraintError) {
+            return {
+                error: err.errors[0].message || "Validation error"
+            }  
+        }
+        return {
+            error: err
+        }  
     }
 }
 
@@ -49,7 +66,7 @@ export async function getPermission(armyId: number ,deviceSerial?: string): Prom
             }
         )
     
-        return Promise.resolve(permission);
+        return permission;
     }
 
     const permission = await Permission.findOne(
@@ -58,7 +75,7 @@ export async function getPermission(armyId: number ,deviceSerial?: string): Prom
         }
     )
 
-    return Promise.resolve(permission);
+    return permission;
 }
 
 export async function deletePermission(armyId: number ,deviceSerial: string): Promise<boolean> {

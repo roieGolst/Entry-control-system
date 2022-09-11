@@ -1,5 +1,6 @@
 import { Model, DataTypes, InferAttributes, InferCreationAttributes } from "sequelize";
 import db from "../initDb";
+import magicNumbers from "../../config/magicNumbers.json";
 
 
 export default class Permission extends Model<InferAttributes<Permission>, InferCreationAttributes<Permission>> {
@@ -17,7 +18,7 @@ Permission.init (
         },
 
         deviceSerial: {
-            type: DataTypes.STRING(100),
+            type: DataTypes.STRING(magicNumbers.MAX_SERIAL_NUMBER_LENGTH),
             allowNull: false
         },
 

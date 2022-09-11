@@ -1,40 +1,41 @@
 import { Model, DataTypes, InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
 import db from "../initDb";
-import magicNumbers from "../../config/magicNumbers.json";
+import magicNumber from "../../config/magicNumbers.json";
 
-export default class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
+export default class Soldier extends Model<InferAttributes<Soldier>, InferCreationAttributes<Soldier>> {
     declare armyId: number;
     declare name: string;
     declare lastname: string;
     declare phoneNumber: string;
-    declare password: string;
+    declare level: number;
     declare expiraionDate: string;
 };
 
-User.init(
+Soldier.init(
     {
         armyId: {
-            type: DataTypes.STRING(magicNumbers.ARMY_ID_LENGTH),
+            type: DataTypes.STRING(magicNumber.ARMY_ID_LENGTH),
             allowNull: false,
             primaryKey: true,
         },
 
         name: {
-            type: DataTypes.STRING(magicNumbers.MAX_NAME_LENGTH),
+            type: DataTypes.STRING(magicNumber.MAX_NAME_LENGTH),
         },
 
         lastname: {
-            type: DataTypes.STRING(magicNumbers.MAX_LASTNAME_LENGTH),
+            type: DataTypes.STRING(magicNumber.MAX_LASTNAME_LENGTH),
             allowNull: false
         },
 
         phoneNumber: {
-            type: DataTypes.STRING(magicNumbers.PHONE_NUMBER_LENGTH)
+            type: DataTypes.STRING(magicNumber.PHONE_NUMBER_LENGTH)
         },
         
-        password: {
-            type: DataTypes.STRING(magicNumbers.MAX_NAME_LENGTH),
-            allowNull: true
+        level: {
+            type: DataTypes.TINYINT,
+            allowNull: false,
+            defaultValue: magicNumber.LOWER_LEVEL
         },
         
         expiraionDate: {
@@ -44,7 +45,7 @@ User.init(
 
     {
         sequelize: db,
-        tableName: "Users",
+        tableName: "Soldiers",
         timestamps: false,
     }
 );

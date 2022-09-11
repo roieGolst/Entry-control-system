@@ -1,5 +1,6 @@
 import { Model, DataTypes, InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
 import db from "../initDb";
+import magicNumbers from "../../config/magicNumbers.json";
 
 
 export default class Logs extends Model<InferAttributes<Logs>, InferCreationAttributes<Logs>> {
@@ -27,12 +28,12 @@ Logs.init (
         },
 
         armyId: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING(magicNumbers.ARMY_ID_LENGTH),
             allowNull: false
         },
 
         deviceSerial: {
-            type: DataTypes.STRING(100),
+            type: DataTypes.STRING(magicNumbers.MAX_SERIAL_NUMBER_LENGTH),
             allowNull: false
         },
 
@@ -47,7 +48,7 @@ Logs.init (
         },
         
         response: {
-            type: DataTypes.STRING(100),
+            type: DataTypes.STRING(magicNumbers.MAX_RESPONSE_LENGTH),
             allowNull: false
         }
     },
