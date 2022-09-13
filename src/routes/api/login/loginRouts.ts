@@ -22,10 +22,11 @@ router.post("/", async (req, res) => {
 
     if(!user) {
         res.status(401).send("User name or password worng!");
+        return;
     }
 
-    const token = genereteToken(user as User);
-    const refreshToken = jwt.sign({armyID: user!.armyId, password: user!.password}, env.REFRESH_TOKEN);
+    const token = genereteToken(user);
+    const refreshToken = jwt.sign({armyID: user.armyId, password: user.password}, env.REFRESH_TOKEN);
 
     res.cookie("refresh-token", refreshToken);
     res.json({"access-token": token})

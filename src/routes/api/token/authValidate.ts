@@ -15,16 +15,16 @@ router.post("/", (req, res) => {
         return;
     }
 
-    try{
-        let user = jwt.verify(token, env.REFRESH_TOKEN);
+    jwt.verify(token, env.REFRESH_TOKEN, (err, value) => {
+        if(err) {
+            res.sendStatus(401);
+            return;
+        }
 
-        const newToken = genereteToken(user as User);
+        const newToken = genereteToken(value as User);
         res.json({ "access-token": newToken })
         return;
-    }
-    catch(err) {
-        res.send(err);
-    }
+    });
 })
 
 export function authValidate(req: Request, res: Response, next: NextFunction): void {
@@ -34,14 +34,15 @@ export function authValidate(req: Request, res: Response, next: NextFunction): v
         res.status(401).send("Access denied");
         return;
     }
-
-    try {
-        jwt.verify(token, env.SECRET_TOKEN);
+    jwt.verify(token, env.SECRET_TOKEN, (err, value) => {
+        if(err) {
+            res.sendStatus(403);
+            return;
+        }
+        
         next();
-    }
-    catch(err) {
-        res.status(400).send("Invalid token");
-    }
+    });
+    
 }
 
 export function genereteToken(user: User): string {

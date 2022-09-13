@@ -1,4 +1,4 @@
-import Joi, { ValidationResult } from "joi";
+import Joi from "joi";
 import { DeviceAtributs } from "../utils/db/device";
 import magicNumber from "../config/magicNumbers.json";
 import { IValidationResult } from "./index";
