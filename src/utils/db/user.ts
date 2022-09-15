@@ -52,10 +52,7 @@ export async function addUser(obj: any): Promise<InsertResult<UserAtributs>>{
 }
 
 export async function getUser(armyId: number): Promise<User | null> {
-    let user = await User.findOne({
-        where: { armyId: armyId},
-        attributes: ["armyId", "name", "lastname", "phoneNumber", "expiraionDate"]
-    });
+    let user = await User.findByPk(armyId);
 
     return user;
 }

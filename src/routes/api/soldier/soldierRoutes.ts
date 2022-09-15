@@ -20,14 +20,14 @@ router.get("/:armyId", async (req, res) => {
 
 router.post("/create", async (req, res) => {
 
-    const isValidate = soldierValidator.validate(req.body);
+    const isValid = soldierValidator.validate(req.body);
     
-    if(!isValidate.result){
-        res.status(400).send(`Validation error: ${isValidate.error}`);
+    if(!isValid.result){
+        res.status(400).send(`Validation error: ${isValid.error}`);
         return;
     }
 
-    const soldier = await soldierUtils.addSoldier(isValidate.result);
+    const soldier = await soldierUtils.addSoldier(isValid.result);
 
     if(!soldier.result) {
         res.status(400).send(`Error message: ${soldier.error})`);
